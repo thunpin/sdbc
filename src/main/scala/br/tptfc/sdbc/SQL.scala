@@ -93,6 +93,8 @@ object SQL {
         result = result ::: parse(SDBCResult(r)) :: Nil
       }
 
+      r.close()
+
       result
     } finally {
       pStmt.close()
