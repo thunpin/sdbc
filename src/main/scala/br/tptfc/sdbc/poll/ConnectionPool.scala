@@ -32,7 +32,7 @@ trait ConnectionPool {
    * a valid sql connection
    * @return a valid sql connection
    */
-  def newConnection(implicit name:String = new Date().toString):Connection = synchronized {
+  def connection(implicit name:String = new Date().toString):Connection = synchronized {
     if (openedConnections.contains(name)) {
       openedConnections.get(name).get
     } else {

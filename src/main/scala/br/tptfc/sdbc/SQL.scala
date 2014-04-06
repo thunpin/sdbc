@@ -1,6 +1,8 @@
 package br.tptfc.sdbc
 
-import java.sql.{PreparedStatement, ResultSet, Statement, Connection}
+import java.sql._
+import scala.Some
+import scala.Array
 
 /**
  * Created by tptfc on 4/5/14.
@@ -19,8 +21,8 @@ object SQL {
     val pStmt = c.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
 
     try {
-      pStmt.executeUpdate()
       addParams(pStmt, params)
+      pStmt.executeUpdate()
 
       val rs:ResultSet = pStmt.getGeneratedKeys
 
@@ -65,7 +67,7 @@ object SQL {
 
     try {
       addParams(pStmt,params)
-      pStmt.executeQuery()
+      pStmt.execute()
     } finally {
       pStmt.close()
     }
@@ -139,11 +141,17 @@ object SQL {
    * @param args arguments
    */
   protected def addParams(pStmt:PreparedStatement, args:Seq[Any]) {
+
     var i = 0
     args.foreach {
-      a =>
-        pStmt.setObject(i,a)
+      arg =>
         i = i + 1
+
+        arg match {
+          case Some(value:Any) => pStmt.setObject(i,value)
+          case None => pStmt.setObject(i,null)
+          case _ => pStmt.setObject(i,arg)
+        }
     }
   }
 
@@ -154,20 +162,23 @@ object SQL {
    * @return JDBC sql and arguments
    */
   protected def convert(sql:String, args:(String,Any)*):(String,List[Any]) = {
-    val query = sql.replaceAll("{[\\w\\d]+}","?")
+    val query = sql.replaceAll("\\{[\\w\\d]+\\}","?")
     if (args.isEmpty) {
       query->Nil
     } else {
-      val params = sql.split("}")
+      val tmp = new StringBuilder()
+      tmp.append(sql).append(" ")
+      val params = tmp.toString().split("\\}")
 
       if (params.length > 1) {
-        val seq = new Array[Any](params.length - 2)
+        val seq = new Array[Any](params.length - 1)
         val mapArgs = args.map({ t => (t._1, t._2)}).toMap
         var i = 0
-        while (i < params.length - 2) {
-          seq(i) = mapArgs.get(params(i).split("{")(1).trim).get
+        while (i < params.length -1) {
+          seq(i) = mapArgs.get(params(i).split("\\{")(1).trim).get
           i = i + 1
         }
+
         query->seq.toList
       } else {
         query->Nil
