@@ -72,7 +72,7 @@ object SQL {
   }
 
   /**
-   * execute query with return
+   * execute select query
    *
    * @param sql sql
    * @param args sql arguments
@@ -80,7 +80,7 @@ object SQL {
    * @param c database connection
    * @tparam A object type
    */
-  def execute[A](sql:String, args:(String,Any)*)(parse:SDBCResult=>A)(implicit c:Connection):Seq[A] = {
+  def select[A](sql:String, args:(String,Any)*)(parse:SDBCResult=>A)(implicit c:Connection):Seq[A] = {
     val (query,params) = convert(sql,args:_*)
     val pStmt = c.prepareStatement(query)
 

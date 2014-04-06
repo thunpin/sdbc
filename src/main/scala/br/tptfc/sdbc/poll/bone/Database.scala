@@ -16,7 +16,7 @@ import br.tptfc.sdbc.poll.ConnectionPool
  * @param acquireIncrement acquire increment [default: 5]
  * @param partitionCount partition count [default: 3]
  */
-class Database(driver:String,
+case class Database(driver:String,
                url:String,
                user:String,
                password:String,
