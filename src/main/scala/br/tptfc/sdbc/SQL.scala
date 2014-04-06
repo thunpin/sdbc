@@ -102,6 +102,38 @@ object SQL {
   }
 
   /**
+   * execute query with return
+   *
+   * @param sql sql
+   * @param args sql arguments
+   * @param parse convert to object
+   * @param c database connection
+   * @tparam A object type
+   */
+  def unique[A](sql:String, args:(String,Any)*)(parse:SDBCResult=>A)(implicit c:Connection):Option[A] = {
+    val (query,params) = convert(sql,args:_*)
+    val pStmt = c.prepareStatement(query)
+
+    try {
+      addParams(pStmt,params)
+      val r = pStmt.executeQuery()
+
+      val result:Option[A] =
+      if (r.next()) {
+        Some(parse(SDBCResult(r)))
+      } else {
+        None
+      }
+
+      r.close()
+
+      result
+    } finally {
+      pStmt.close()
+    }
+  }
+
+  /**
    * add arguments in prepare statement
    * @param pStmt prepare statement
    * @param args arguments

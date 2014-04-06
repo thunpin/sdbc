@@ -9,6 +9,13 @@ import java.sql.ResultSet
 case class SDBCResult(result:ResultSet) {
   private var pos:Int = 1
 
+  def any = result.getObject(pos)
+  def pAny = {
+    val result = any
+    pos = pos + 1
+    result
+  }
+
   def blob = result.getBlob(pos)
   def pBlob = {
     val result = blob
