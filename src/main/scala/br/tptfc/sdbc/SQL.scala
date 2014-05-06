@@ -140,7 +140,7 @@ object SQL {
    * @param pStmt prepare statement
    * @param args arguments
    */
-  protected def addParams(pStmt:PreparedStatement, args:Seq[Any]) {
+  protected def addParams(pStmt:PreparedStatement, args:Seq[Any])(implicit connection:Connection) {
 
     var i = 0
     args.foreach {
@@ -148,6 +148,12 @@ object SQL {
         i = i + 1
 
         arg match {
+          case seq:Seq[_] =>
+            i = i - 1
+            seq.foreach(value => {
+              i = i + 1
+              pStmt.setObject(i, value)
+            })
           case Some(value:Any) => pStmt.setObject(i,value)
           case None => pStmt.setObject(i,null)
           case _ => pStmt.setObject(i,arg)
@@ -162,9 +168,8 @@ object SQL {
    * @return JDBC sql and arguments
    */
   protected def convert(sql:String, args:(String,Any)*):(String,List[Any]) = {
-    val query = sql.replaceAll("\\{[\\w\\d]+\\}","?")
     if (args.isEmpty) {
-      query->Nil
+      sql->Nil
     } else {
       val tmp = new StringBuilder()
       tmp.append(sql).append(" ")
@@ -174,14 +179,26 @@ object SQL {
         val seq = new Array[Any](params.length - 1)
         val mapArgs = args.map({ t => (t._1, t._2)}).toMap
         var i = 0
+        var query = sql
         while (i < params.length -1) {
-          seq(i) = mapArgs.get(params(i).split("\\{")(1).trim).get
+          val key = params(i).split("\\{")(1).trim
+          val param = mapArgs.get(key).get
+          seq(i) = param
+
+          val value =
+          param match {
+            case (seq:Seq[_]) => seq.map(f => "?").mkString(",")
+            case _ => "?"
+          }
+
+          query = query.replaceAll("\\{" + key + "\\}", value)
+
           i = i + 1
         }
 
         query->seq.toList
       } else {
-        query->Nil
+        sql->Nil
       }
     }
   }
