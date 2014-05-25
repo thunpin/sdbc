@@ -1,8 +1,5 @@
 package br.tptfc.sdbc
 
-import java.sql.Blob
-import java.util.Date
-
 /**
  * Created by tptfc on 4/5/14.
  *
