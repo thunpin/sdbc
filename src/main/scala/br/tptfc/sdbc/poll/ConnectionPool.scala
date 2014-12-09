@@ -10,92 +10,126 @@ import java.util.Date
  *
  */
 trait ConnectionPool {
-  protected def newConnection:Connection
+	protected def newConnection:Connection
 
-  /**
-   * map used to store the opened connections
-   */
-  protected var openedConnections:Map[String,Connection] = Map()
-  protected var openedConnectionsInverse:Map[Connection,String] = Map()
+	/**
+	 * map used to store the opened connections
+	 */
+	protected var openedConnections:Map[String,Connection] = Map()
+	protected var openedConnectionsInverse:Map[Connection,String] = Map()
 
-  def singleExec[A](action:(Connection) => A):A = {
-    val connection = newConnection
+	def singleExec[A](action:(Connection) => A):A = {
+		val connection = newConnection
 
-    try {
-      action(connection)
-    } finally {
-      closeConnection(connection)
-    }
-  }
+		try {
+			action(connection)
+		} finally {
+			closeConnection(connection)
+		}
+	}
 
-  /**
-   * a valid sql connection
-   * @return a valid sql connection
-   */
-  def connection(implicit name:String = new Date().toString):Connection = synchronized {
-    if (openedConnections.contains(name)) {
-      openedConnections.get(name).get
-    } else {
-      val connection = newConnection
-      connection.setAutoCommit(false)
-      openedConnections += name -> connection
-      openedConnectionsInverse += connection -> name
-      connection
-    }
-  }
+	/**
+	 * define a transaction scope
+	 * commit and rollback will executed automaticaly
+	 *
+	 * @param action  command to be executed in transaction scope
+	 */
+	def transaction[T](action: (Connection) => T):T = {
+		var connection:Option[Connection] = None
+		var result:Option[T] = None
 
-  /**
-   * execute a db rollback
-   * @param connection sql connection
-   */
-  def rollback(connection:Connection):Unit =  {
-    if (!connection.isClosed) connection.rollback()
-  }
+		try {
+			connection = Some(newConnection)
+			result = runIfThereIsConnection(connection, action)
+			runIfThereIsConnection(connection, commit)
+		} catch {
+			case e:Exception =>
+				runIfThereIsConnection(connection, rollback)
+				throw e
+		} finally {
+			runIfThereIsConnection(connection, closeConnection)
+		}
 
-  /**
-   * commit the connection db transaction
-   * @param connection sql connection
-   */
-  def commit(connection:Connection):Unit =  {
-    if (!connection.isClosed) connection.commit()
-  }
+		result.get
+	}
 
-  /**
-   * - close the connection
-   * - remove the connection from opened connections map
-   *
-   * @param connection to close
-   */
-  def closeConnection(connection:Connection):Unit =  {
-    if (!connection.isClosed) {
-      connection.close()
-    }
+	/**
+	 * a valid sql connection
+	 * @return a valid sql connection
+	 */
+	def connection(implicit name:String = new Date().toString):Connection = synchronized {
+		if (openedConnections.contains(name)) {
+			openedConnections.get(name).get
+		} else {
+			val connection = newConnection
+			connection.setAutoCommit(false)
+			openedConnections += name -> connection
+			openedConnectionsInverse += connection -> name
+			connection
+		}
+	}
 
-    val key = openedConnectionsInverse.get(connection).get
-    openedConnectionsInverse = openedConnectionsInverse - connection
-    openedConnections = openedConnections - key
-  }
+	/**
+	 * execute a db rollback
+	 * @param connection sql connection
+	 */
+	def rollback(connection:Connection):Unit =  {
+		if (!connection.isClosed) connection.rollback()
+	}
 
-  /**
-   * rollback all connection
-   */
-  def rollbackAll()(implicit closeConnections:Boolean = true):Unit =  {
-    openedConnections.values.foreach(connection => rollback(connection))
-    if (closeConnections) closeAllConnection()
-  }
+	/**
+	 * commit the connection db transaction
+	 * @param connection sql connection
+	 */
+	def commit(connection:Connection):Unit =  {
+		if (!connection.isClosed) connection.commit()
+	}
 
-  /**
-   * commit all opened connections
-   */
-  def commitAll()(implicit closeConnections:Boolean = true):Unit =  {
-    openedConnections.values.foreach(connection => commit(connection))
-    if (closeConnections) closeAllConnection()
-  }
+	/**
+	 * - close the connection
+	 * - remove the connection from opened connections map
+	 *
+	 * @param connection to close
+	 */
+	def closeConnection(connection:Connection):Unit =  {
+		if (!connection.isClosed) {
+			connection.close()
+		}
 
-  /**
-   * close all opened connections
-   */
-  def closeAllConnection():Unit =  { synchronized {
-    openedConnections.values.foreach(connection => closeConnection(connection))
-  }}
+		val key = openedConnectionsInverse.get(connection).get
+		openedConnectionsInverse = openedConnectionsInverse - connection
+		openedConnections = openedConnections - key
+	}
+
+	/**
+	 * rollback all connection
+	 */
+	def rollbackAll()(implicit closeConnections:Boolean = true):Unit =  {
+		openedConnections.values.foreach(connection => rollback(connection))
+		if (closeConnections) closeAllConnection()
+	}
+
+	/**
+	 * commit all opened connections
+	 */
+	def commitAll()(implicit closeConnections:Boolean = true):Unit =  {
+		openedConnections.values.foreach(connection => commit(connection))
+		if (closeConnections) closeAllConnection()
+	}
+
+	/**
+	 * close all opened connections
+	 */
+	def closeAllConnection():Unit =  { synchronized {
+		openedConnections.values.foreach(connection => closeConnection(connection))
+	}}
+
+	/**
+	 * execute action if there is connection in the option
+	 * @type {[type]}
+	 */
+	private def runIfThereIsConnection[T](conn:Option[Connection], action:Connection => T):Option[T] = conn match {
+		case Some(connection:Connection) => Option(action(connection))
+		case _ => None
+	}
 }
