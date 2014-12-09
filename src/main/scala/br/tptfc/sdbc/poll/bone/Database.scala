@@ -45,7 +45,7 @@ case class Database(driver:String,
     boneCP.shutdown()
   }
 
-  def pool:ConnectionPool = BoneConnectionPool(this)
+  val pool:ConnectionPool = BoneConnectionPool(this)
 
   private[bone] def connection:Connection = boneCP.getConnection
 }
