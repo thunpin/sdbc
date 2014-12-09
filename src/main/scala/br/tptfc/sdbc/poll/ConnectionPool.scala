@@ -18,16 +18,6 @@ trait ConnectionPool {
 	protected var openedConnections:Map[String,Connection] = Map()
 	protected var openedConnectionsInverse:Map[Connection,String] = Map()
 
-	def singleExec[A](action:(Connection) => A):A = {
-		val connection = newConnection
-
-		try {
-			action(connection)
-		} finally {
-			closeConnection(connection)
-		}
-	}
-
 	/**
 	 * define a transaction scope
 	 * commit and rollback will executed automaticaly
