@@ -25,19 +25,19 @@ trait ConnectionPool {
 	 * @param action  command to be executed in transaction scope
 	 */
 	def transaction[T](action: (Connection) => T):T = {
-		var connection:Option[Connection] = None
+		var conn:Option[Connection] = None
 		var result:Option[T] = None
 
 		try {
-			connection = Some(newConnection)
-			result = runIfThereIsConnection(connection, action)
-			runIfThereIsConnection(connection, commit)
+			conn = Some(connection)
+			result = runIfThereIsConnection(conn, action)
+			runIfThereIsConnection(conn, commit)
 		} catch {
 			case e:Exception =>
-				runIfThereIsConnection(connection, rollback)
+				runIfThereIsConnection(conn, rollback)
 				throw e
 		} finally {
-			runIfThereIsConnection(connection, closeConnection)
+			runIfThereIsConnection(conn, closeConnection)
 		}
 
 		result.get
