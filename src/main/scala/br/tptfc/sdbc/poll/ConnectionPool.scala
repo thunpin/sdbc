@@ -2,6 +2,7 @@ package br.tptfc.sdbc.poll
 
 import java.sql.Connection
 import java.util.Date
+import java.util.Random
 
 /**
  * Created by tptfc on 1/2/14.
@@ -47,7 +48,7 @@ trait ConnectionPool {
 	 * a valid sql connection
 	 * @return a valid sql connection
 	 */
-	def connection(implicit name:String = new Date().toString):Connection = synchronized {
+	def connection(implicit name:String = (new Date().getTime().toString + new Random().nextInt)):Connection = synchronized {
 		if (openedConnections.contains(name)) {
 			openedConnections.get(name).get
 		} else {
@@ -86,9 +87,13 @@ trait ConnectionPool {
 			connection.close()
 		}
 
-		val key = openedConnectionsInverse.get(connection).get
-		openedConnectionsInverse = openedConnectionsInverse - connection
-		openedConnections = openedConnections - key
+		openedConnectionsInverse.get(connection) match {
+			case Some(key:String) =>
+				openedConnectionsInverse = openedConnectionsInverse - connection
+				openedConnections = openedConnections - key
+			case None =>
+		}
+		
 	}
 
 	/**
