@@ -10,8 +10,9 @@ object SQLHelper {
 	 * @param {Map[String,Any]} fields		[map table fields -> values]
 	 */
 	def insert(table:String, fields:Map[String,Any])(implicit connection:Connection):Option[Long] = {
-		val query = "insert into " + table + " " + fields.keySet.mkString("(", ",", ")") +
-		" values " + fields.keySet.map(value => "{" + value + "}").mkString("(", ",", ")")
+		val keySet = fields.keySet.toList
+		val query = "insert into " + table + " " + keySet.mkString("(", ",", ")") +
+		" values " + keySet.map(value => "{" + value + "}").mkString("(", ",", ")")
 
 		SQL.insert(query, fields.toList:_*)
 	}
