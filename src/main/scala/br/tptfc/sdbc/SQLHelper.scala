@@ -26,11 +26,14 @@ object SQLHelper {
 	 */
 	def update(table:String, fields:Map[String,Any], where:Map[String, Any])
 	(implicit connection:Connection) {
+		val _where:Map[String, Any] = where.map(t => { ("#__where__" + t._1 -> t._2) })
 		val query = "update " + table + " set " + 
 			fields.keySet.map(value => value + "={" + value + "}").mkString(",") +
-			" where "	+ where.keySet.map(value => value + "={" + value + "}").mkString(" and ")
+			" where "	+ where.keySet.map(value => value + "={#__where__" + value + "}").mkString(" and ")
 
-		SQL.update(query, fields.toList:_*)
+		val _fields:Map[String,Any] = fields ++ _where
+
+		SQL.update(query, _fields.toList:_*)
 	}
 
 	/**
