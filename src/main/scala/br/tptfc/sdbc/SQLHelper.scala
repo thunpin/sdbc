@@ -18,6 +18,19 @@ object SQLHelper {
 	}
 
 	/**
+	 * delete the table content
+	 * @param {String}	table 	[table name]
+	 * @param {Map}		where 	[where arguments fields]
+	 */
+	def delete(table:String, where:Map[String, Any])(implicit connection:Connection):Unit = {
+		val keySet = where.keySet.toList
+		val sql = "delete from " + table + " where " + 
+			where.keySet.map(value => value + "={" + value + "}").mkString(" and ")
+
+		SQL.execute(sql, where.toList:_*)
+	}
+
+	/**
 	 * update the data
 	 * 
 	 * @param  {String} table             [table name]
