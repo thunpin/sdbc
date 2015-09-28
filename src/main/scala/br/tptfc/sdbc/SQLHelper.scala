@@ -3,6 +3,7 @@ package br.tptfc.sdbc
 import java.sql.Connection
 
 object SQLHelper {
+
 	/**
 	 * persist the data in data base
 	 * 
@@ -47,6 +48,27 @@ object SQLHelper {
 		val _fields:Map[String,Any] = fields ++ _where
 
 		SQL.update(query, _fields.toList:_*)
+	}
+
+	/**
+	 * count the number of rows
+	 *
+	 * @param table:String - select table
+	 * @param whereArgs:(String, Any) - where arguments
+	 */
+	def count(table:String, whereArgs: Seq[(String, Any)]=Nil)(implicit connection:Connection):Option[Long] = {
+		val sql = "select count (*) from " + table + (if (!whereArgs.isEmpty) {
+			" where " + whereArgs.map(value => value._1 + "= {" + value._1 + "}").mkString("(", " and ", ")")
+		} else {
+			" "
+		})
+
+		try {
+			SQL.unique(sql, whereArgs.map(value=> value._1 -> value._2):_*) (r => r.long)
+		} catch {
+			case e:Exception => None
+		}
+		
 	}
 
 	/**
