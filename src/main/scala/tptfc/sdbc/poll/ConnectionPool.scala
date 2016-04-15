@@ -1,4 +1,4 @@
-package br.tptfc.sdbc.poll
+package tptfc.sdbc.poll
 
 import java.sql.Connection
 import java.util.Date
@@ -93,7 +93,7 @@ trait ConnectionPool {
 				openedConnections = openedConnections - key
 			case None =>
 		}
-		
+
 	}
 
 	/**

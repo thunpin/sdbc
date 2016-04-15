@@ -1,8 +1,8 @@
-package br.tptfc.sdbc.poll.bone
+package tptfc.sdbc.poll.bone
 
 import com.jolbox.bonecp.{BoneCP, BoneCPConfig}
 import java.sql.Connection
-import br.tptfc.sdbc.poll.ConnectionPool
+import tptfc.sdbc.poll.ConnectionPool
 
 /**
  * connection pool implemented with boneCP
@@ -24,7 +24,7 @@ case class Database(driver:String,
                maxPoolSize:Int=20,
                acquireIncrement:Int=5,
                partitionCount:Int=3) {
-  
+
   protected lazy val boneCP = {
     Class.forName(driver)
     val config = new BoneCPConfig()

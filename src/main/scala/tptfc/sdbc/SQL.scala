@@ -1,4 +1,4 @@
-package br.tptfc.sdbc
+package tptfc.sdbc
 
 import java.sql._
 import scala.Some

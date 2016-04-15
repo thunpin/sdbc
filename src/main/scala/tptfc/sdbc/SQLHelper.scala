@@ -1,4 +1,4 @@
-package br.tptfc.sdbc
+package tptfc.sdbc
 
 import java.sql.Connection
 
@@ -6,7 +6,7 @@ object SQLHelper {
 
 	/**
 	 * persist the data in data base
-	 * 
+	 *
 	 * @param  {String} table             [table name]
 	 * @param {Map[String,Any]} fields		[map table fields -> values]
 	 */
@@ -25,7 +25,7 @@ object SQLHelper {
 	 */
 	def delete(table:String, where:Map[String, Any])(implicit connection:Connection):Unit = {
 		val keySet = where.keySet.toList
-		val sql = "delete from " + table + " where " + 
+		val sql = "delete from " + table + " where " +
 			where.keySet.map(value => value + "={" + value + "}").mkString(" and ")
 
 		SQL.execute(sql, where.toList:_*)
@@ -33,7 +33,7 @@ object SQLHelper {
 
 	/**
 	 * update the data
-	 * 
+	 *
 	 * @param  {String} table             [table name]
 	 * @param  {Map[String,Any]} fields		[fields table with your new value]
 	 * @param  {Map[String,Any]} where		[where args]
@@ -41,7 +41,7 @@ object SQLHelper {
 	def update(table:String, fields:Map[String,Any], where:Map[String, Any])
 	(implicit connection:Connection) {
 		val _where:Map[String, Any] = where.map(t => { ("#__where__" + t._1 -> t._2) })
-		val query = "update " + table + " set " + 
+		val query = "update " + table + " set " +
 			fields.keySet.map(value => value + "={" + value + "}").mkString(",") +
 			" where "	+ where.keySet.map(value => value + "={#__where__" + value + "}").mkString(" and ")
 
@@ -68,7 +68,7 @@ object SQLHelper {
 		} catch {
 			case e:Exception => None
 		}
-		
+
 	}
 
 	/**
@@ -79,9 +79,9 @@ object SQLHelper {
 	 * @param args:(String, Any) - query where fields->params
 	 * @type entity:Data
 	 */
-	def unique[T] 
+	def unique[T]
 	(
-		table:String, 
+		table:String,
 		fields:Seq[String],
 		whereArgs: Seq[(String, Any)]=Nil
 	)
@@ -99,12 +99,12 @@ object SQLHelper {
 	 * @param whereArgs:(EntityField, Any) - query where fields->params
 	 * @param orderFields:Seq[EntityField] - order fields
 	 * @param order:Option[String] - order type: "asc" or "desc"
-	 * 
+	 *
 	 * @return Seq[Data]
 	 */
 	def list[T]
 	(
-		table:String, 
+		table:String,
 		fields:Seq[String],
 		whereArgs: Seq[(String, Any)]=Nil,
 		orderFields:Seq[String]=Nil,
@@ -118,31 +118,31 @@ object SQLHelper {
 
 	/**
 	 * create select query
-	 * 
+	 *
 	 * @return String query
 	 */
 	private def createSelect
 	(
-		table:String, 
+		table:String,
 		fields:String*
 	)
 	(
-		args:Seq[(String,Any)]=Nil, 
-		orderFields:Seq[String]=Nil, 
+		args:Seq[(String,Any)]=Nil,
+		orderFields:Seq[String]=Nil,
 		order:Option[String]=None
 	):String = {
-		
-		var sql = 
+
+		var sql =
 		if (fields.isEmpty) { "select * "
 		} else {
 			"select " + fields.map(value => value).mkString(",")
 		}
 
 		sql = sql + " from " + table
-			
+
 		if (!args.isEmpty) {
 			sql = sql + " where " +
-				args.map(value => value._1 + 
+				args.map(value => value._1 +
 				"= {" + value._1 + "}").mkString("(", " and ", ")")
 		}
 

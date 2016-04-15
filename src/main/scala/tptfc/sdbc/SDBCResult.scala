@@ -1,4 +1,4 @@
-package br.tptfc.sdbc
+package tptfc.sdbc
 
 import java.sql.ResultSet
 
@@ -19,8 +19,8 @@ case class SDBCResult(result:ResultSet) {
   def int = toDefault{result.getInt(pos)}
   def long = toDefault{result.getLong(pos)}
   def string = toDefault{result.getString(pos)}
-  
-  
+
+
   def optAny = toOption{result.getObject(pos)}
   def optBlob = toOption{result.getByte(pos)}
   def optBoolean = toOption{result.getBoolean(pos)}
@@ -32,13 +32,13 @@ case class SDBCResult(result:ResultSet) {
   def optLong = toOption{result.getLong(pos)}
   def optString = toOption{result.getString(pos)}
 
-  
+
   private def toDefault[A](exec: => A):A = {
     val result = exec
     pos = pos + 1
     result
   }
-  
+
   private def toOption[A](exec: => A):Option[A] = {
     val result =
     try {

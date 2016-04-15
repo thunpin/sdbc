@@ -1,6 +1,6 @@
-package br.tptfc.sdbc.poll.bone
+package tptfc.sdbc.poll.bone
 
-import br.tptfc.sdbc.poll.ConnectionPool
+import tptfc.sdbc.poll.ConnectionPool
 
 /**
  * Created by tptfc on 4/5/14.

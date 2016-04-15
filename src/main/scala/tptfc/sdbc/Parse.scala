@@ -1,4 +1,4 @@
-package br.tptfc.sdbc
+package tptfc.sdbc
 
 /**
  * Created by tptfc on 4/5/14.
