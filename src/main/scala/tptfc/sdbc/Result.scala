@@ -6,7 +6,7 @@ import java.sql.ResultSet
  * Created by tptfc on 4/5/14.
  *
  */
-case class SDBCResult(result:ResultSet) {
+case class Result(result:ResultSet) {
   private var pos:Int = 1
 
   def any = toDefault{result.getObject(pos)}

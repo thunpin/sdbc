@@ -11,3 +11,5 @@ libraryDependencies ++= {
     "com.jolbox" % "bonecp" % "0.8.0.RELEASE"
   )
 }
+
+libraryDependencies <+= (scalaVersion) { sv => "org.scala-lang" % "scala-reflect" % sv}

@@ -16,7 +16,8 @@ object SQL {
    * @param c JDBC connection
    * @return insert unique id
    */
-  def insert(sql:String, args:(String,Any)*)(implicit c:Connection):Option[Long] = {
+  def insert(sql:String, args:(String,Any)*)
+  (implicit c:java.sql.Connection):Option[Long] = {
     val (query,params) = convert(sql,args:_*)
     val pStmt = c.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
 
@@ -44,7 +45,8 @@ object SQL {
    * @param c connection
    * @return number of changed rows
    */
-  def update(sql:String, args:(String,Any)*)(implicit c:Connection):Long = {
+  def update(sql:String, args:(String,Any)*)
+  (implicit c:java.sql.Connection):Long = {
     val (query,params) = convert(sql,args:_*)
     val pStmt = c.prepareStatement(query)
     try {
@@ -61,7 +63,8 @@ object SQL {
    * @param args query arguments
    * @param c sql connection
    */
-  def execute(sql:String, args:(String,Any)*)(implicit c:Connection):Unit = {
+  def execute(sql:String, args:(String,Any)*)
+  (implicit c:java.sql.Connection):Unit = {
     val (query,params) = convert(sql,args:_*)
     val pStmt = c.prepareStatement(query)
 
@@ -82,7 +85,8 @@ object SQL {
    * @param c database connection
    * @tparam A object type
    */
-  def select[A](sql:String, args:(String,Any)*)(parse:SDBCResult=>A)(implicit c:Connection):Seq[A] = {
+  def select[A](sql:String, args:(String,Any)*)(parse:Result=>A)
+  (implicit c:java.sql.Connection):Seq[A] = {
     val (query,params) = convert(sql,args:_*)
     val pStmt = c.prepareStatement(query)
 
@@ -92,7 +96,7 @@ object SQL {
       var result:List[A] = Nil
 
       while (r.next()) {
-        result = result ::: parse(SDBCResult(r)) :: Nil
+        result = result ::: parse(Result(r)) :: Nil
       }
 
       r.close()
@@ -112,7 +116,8 @@ object SQL {
    * @param c database connection
    * @tparam A object type
    */
-  def unique[A](sql:String, args:(String,Any)*)(parse:SDBCResult=>A)(implicit c:Connection):Option[A] = {
+  def unique[A](sql:String, args:(String,Any)*)(parse:Result=>A)
+  (implicit c:java.sql.Connection):Option[A] = {
     val (query,params) = convert(sql,args:_*)
     val pStmt = c.prepareStatement(query)
 
@@ -122,7 +127,7 @@ object SQL {
 
       val result:Option[A] =
       if (r.next()) {
-        Some(parse(SDBCResult(r)))
+        Some(parse(Result(r)))
       } else {
         None
       }
@@ -140,7 +145,8 @@ object SQL {
    * @param pStmt prepare statement
    * @param args arguments
    */
-  protected def addParams(pStmt:PreparedStatement, args:Seq[Any])(implicit connection:Connection) {
+  protected def addParams(pStmt:PreparedStatement, args:Seq[Any])
+  (implicit connection:java.sql.Connection) {
 
     var i = 0
     args.foreach {
