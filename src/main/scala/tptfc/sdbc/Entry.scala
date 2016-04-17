@@ -11,7 +11,7 @@ case class Entry(
 
 	val allFields: List[String] = tableKeys.keys.toList ::: tableFields
 
-	def getArgs(tableFields: List[String], entity: Any): List[(String, Any)] = {
+	def getArgs(tableFields: Seq[String], entity: Any): Seq[(String, Any)] = {
 		var args: List[(String, Any)] = Nil
 		val entityType = getTypeFrom(entity)
 		val mirrorEntity = runtimeMirror(getClass.getClassLoader)
