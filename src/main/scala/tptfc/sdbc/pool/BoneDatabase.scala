@@ -1,8 +1,8 @@
-package tptfc.sdbc.poll.bone
+package tptfc.sdbc.pool
 
+import tptfc.sdbc.Database
 import com.jolbox.bonecp.{BoneCP, BoneCPConfig}
 import java.sql.Connection
-import tptfc.sdbc.poll.ConnectionPool
 
 /**
  * connection pool implemented with boneCP
@@ -16,14 +16,14 @@ import tptfc.sdbc.poll.ConnectionPool
  * @param acquireIncrement acquire increment [default: 5]
  * @param partitionCount partition count [default: 3]
  */
-case class Database(driver:String,
+case class BoneDatabase(driver:String,
                url:String,
                user:String,
                password:String,
                minPoolSize:Int=1,
                maxPoolSize:Int=20,
                acquireIncrement:Int=5,
-               partitionCount:Int=3) {
+               partitionCount:Int=3) extends Database {
 
   protected lazy val boneCP = {
     Class.forName(driver)
@@ -45,7 +45,5 @@ case class Database(driver:String,
     boneCP.shutdown()
   }
 
-  val pool:ConnectionPool = BoneConnectionPool(this)
-
-  private[bone] def connection:Connection = boneCP.getConnection
+  def newSqlConnection:Connection = boneCP.getConnection
 }
