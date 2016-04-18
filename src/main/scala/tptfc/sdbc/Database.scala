@@ -25,4 +25,6 @@ trait Database {
 				throw e
 		}
 	}
+
+	def register(reg: (String, Entry)):Unit = record.register(reg)
 }
