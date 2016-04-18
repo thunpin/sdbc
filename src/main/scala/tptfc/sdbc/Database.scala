@@ -26,5 +26,7 @@ trait Database {
 		}
 	}
 
-	def register(reg: (String, Entry)):Unit = record.register(reg)
+	def register(reg: (String, Entry)*):Unit = reg.foreach(r => {
+		record.register(r)
+	})
 }
