@@ -2,16 +2,14 @@ package tptfc.sdbc.statement
 
 import tptfc.sdbc.SQL
 import tptfc.sdbc.Context
-import tptfc.sdbc.Entry
 
-case class Update(entityName: String, context: Context)
-extends Statement(entityName, context) {
+class Update(entityName: String, context: Context) {
 
 	def entity(obj: Any): UpdateResult = {
 		val record = context.record
-		val entry = (record entryFrom entityName).get
+		val entry = record entryFrom entityName
 		val table = entry.tableName
-		val fields = entry.allFields
+		val fields = entry.tableAllFields
 		val args = entry.getArgs(fields, obj)
 		val whereFields = entry.tableKeys.map(field => field._1).toSeq
 		val whereArgs = entry.getArgs(whereFields, obj)
@@ -22,18 +20,18 @@ extends Statement(entityName, context) {
 	}
 
 	def values(args: (String, Any)*):UpdateWhere = {
-		UpdateWhere(entityName, args, context)
+		new UpdateWhere(entityName, args, context)
 	}
 }
 
-case class UpdateWhere(
+class UpdateWhere(
 entityName: String,
 args:Seq[(String, Any)],
 context: Context) {
 
 	def where(where: String, whereArgs: (String,Any)*): UpdateResult = {
 		val record = context.record
-		val entry = (record entryFrom entityName).get
+		val entry = record entryFrom entityName
 		val table = entry.tableName
 		val fields = args.map(arg => arg._1)
 		Update.exec(table, fields, args, where, whereArgs, context)
@@ -43,6 +41,9 @@ context: Context) {
 case class UpdateResult(result: Long, sql: String)
 
 object Update {
+	def apply(entityName: String, context: Context): Update =
+		new Update(entityName, context)
+
 	def exec(table: String,
 	fields:Seq[String],
 	args:Seq[(String, Any)],

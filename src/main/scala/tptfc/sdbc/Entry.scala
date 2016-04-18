@@ -1,15 +1,15 @@
 package tptfc.sdbc
 
+import tptfc.sdbc.error.FieldNotFound
 import scala.reflect.runtime.universe._
 
 case class Entry(
 	tableName: String,
 	tableKeys: Map[String, Boolean],
 	tableFields: List[String],
+	tableAllFields: List[String],
 	entityFields: List[String],
 	tableFieldToEntityField: Map[String, String]) {
-
-	val allFields: List[String] = tableKeys.keys.toList ::: tableFields
 
 	def getArgs(tableFields: Seq[String], entity: Any): Seq[(String, Any)] = {
 		var args: List[(String, Any)] = Nil
@@ -25,6 +25,13 @@ case class Entry(
 		})
 
 		args
+	}
+
+	def entityFieldFrom(tableField: String): String = {
+		tableFieldToEntityField get tableField match {
+			case Some(name:String) => name
+			case None => throw new FieldNotFound(tableField)
+		}
 	}
 
 	private def getTypeFrom[T: TypeTag](obj: T) = typeOf[T]

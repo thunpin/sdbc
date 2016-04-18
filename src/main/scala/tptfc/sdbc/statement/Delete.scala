@@ -2,13 +2,11 @@ package tptfc.sdbc.statement
 
 import tptfc.sdbc.SQL
 import tptfc.sdbc.Context
-import tptfc.sdbc.Entry
 
-case class Delete(entityName: String, context: Context)
-extends Statement(entityName, context) {
+class Delete(entityName: String, context: Context) {
 	def entity(obj: Any):DeleteResult = {
 		val record = context.record
-		val entry = (record entryFrom entityName).get
+		val entry = record entryFrom entityName
 		val table = entry.tableName
 		val whereFields = entry.tableKeys.map(field => field._1).toSeq
 		val whereArgs = entry.getArgs(whereFields, obj)
@@ -20,7 +18,7 @@ extends Statement(entityName, context) {
 
 	def where(where: String, whereArgs: (String, Any)*): DeleteResult = {
 		val record = context.record
-		val entry = (record entryFrom entityName).get
+		val entry = record entryFrom entityName
 		val table = entry.tableName
 
 		exec(table, where, whereArgs, context)
@@ -39,3 +37,8 @@ extends Statement(entityName, context) {
 }
 
 case class DeleteResult(result: Long, sql: String)
+
+object Delete {
+	def apply(entityName: String, context: Context): Delete =
+		new Delete(entityName, context)
+}

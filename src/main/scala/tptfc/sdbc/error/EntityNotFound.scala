@@ -1,3 +1,3 @@
 package tptfc.sdbc.error
 
-case class EntityNotFound() extends Exception
+case class EntityNotFound(entity: String) extends Exception(entity)
