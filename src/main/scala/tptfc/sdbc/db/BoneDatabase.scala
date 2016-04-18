@@ -1,4 +1,4 @@
-package tptfc.sdbc.pool
+package tptfc.sdbc.db
 
 import tptfc.sdbc.Database
 import com.jolbox.bonecp.{BoneCP, BoneCPConfig}
