@@ -3,28 +3,18 @@ package tptfc.sdbc.statement
 import tptfc.sdbc.SQL
 import tptfc.sdbc.Context
 import tptfc.sdbc.Entry
-import tptfc.sdbc.error.EntityNotFound
 
-case class Update(entityName: String, context: Context) {
+case class Update(entityName: String, context: Context)
+extends Statement(entityName, context) {
 
-	validate()
-	private def validate(): Unit = {
-		val record = context.record
-		record entryFrom entityName match {
-			case None =>
-				throw EntityNotFound()
-			case _ =>
-		}
-	}
-
-	def value(entity: Any): UpdateResult = {
+	def entity(obj: Any): UpdateResult = {
 		val record = context.record
 		val entry = (record entryFrom entityName).get
 		val table = entry.tableName
 		val fields = entry.allFields
-		val args = entry.getArgs(fields, entity)
+		val args = entry.getArgs(fields, obj)
 		val whereFields = entry.tableKeys.map(field => field._1).toSeq
-		val whereArgs = entry.getArgs(whereFields, entity)
+		val whereArgs = entry.getArgs(whereFields, obj)
 
 		val where = whereFields.map(f => f + " = {" + f + "}").mkString(" AND ")
 
@@ -66,7 +56,7 @@ object Update {
 		val allArgs = args.toList ::: whereArgs.toList
 
 		implicit val conn = context.conn
-		val result = SQL.update(sql, allArgs:_*)
+		val result = SQL.executeUpdate(sql, allArgs:_*)
 		UpdateResult(result, sql)
 	}
 }

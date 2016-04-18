@@ -12,7 +12,7 @@ trait Database {
 	def transaction[T] (action: (Connection) => T ): T = {
 		val sqlConnection = newSqlConnection
 		sqlConnection.setAutoCommit(false)
-		val context = Context(sqlConnection, record, Nil)
+		val context = Context(sqlConnection, record)
 		val connection = Connection(context)
 
 		try {

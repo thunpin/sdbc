@@ -3,26 +3,17 @@ package tptfc.sdbc.statement
 import tptfc.sdbc.SQL
 import tptfc.sdbc.Context
 import tptfc.sdbc.Entry
-import tptfc.sdbc.error.EntityNotFound
 
-case class Insert(entityName: String, context: Context) {
-	validate()
-	private def validate(): Unit = {
-		val record = context.record
-		record entryFrom entityName match {
-			case None =>
-				throw EntityNotFound()
-			case _ =>
-		}
-	}
+case class Insert(entityName: String, context: Context)
+extends Statement(entityName, context) {
 
-	def value(entity: Any): InsertResult = {
+	def entity(obj: Any): InsertResult = {
 		val record = context.record
 		val entry = (record entryFrom entityName).get
 		val table = entry.tableName
 		val fields = entry.tableKeys.filter(key => !key._2).keys.toList :::
 		 entry.tableFields
-		val args = entry.getArgs(fields, entity)
+		val args = entry.getArgs(fields, obj)
 
 		exec(table, fields, args)
 	}

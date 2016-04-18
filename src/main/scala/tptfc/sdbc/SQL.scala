@@ -45,7 +45,7 @@ object SQL {
    * @param c connection
    * @return number of changed rows
    */
-  def update(sql:String, args:(String,Any)*)
+  def executeUpdate(sql:String, args:(String,Any)*)
   (implicit c:java.sql.Connection):Long = {
     val (query,params) = convert(sql,args:_*)
     val pStmt = c.prepareStatement(query)
