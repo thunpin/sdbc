@@ -52,6 +52,25 @@ context: Context) {
 		join(entityName, on, as, onArgs:_*)
 	}
 
+	def filter(filter: (String,Any), filters: (String,Any)*): Select = {
+		val _filters = filter :: filters.toList
+		var args:List[(String, Any)] = Nil
+		var rules:List[String] = Nil
+
+		var count = 0
+		_filters.foreach(filter => {
+			val key = "_w_arg" + count
+			val rule = filter._1 + " = " + key
+
+			rules = rule :: rules
+			args = (rule -> filter._2) :: args
+			count = count + 1
+		})
+
+		val sql = rules.mkString(" AND ")
+		where(sql, args:_*)
+	}
+
 	def where(where:String, args: (String,Any)*): Select = {
 		val newWhere = new Where("WHERE", where, args:_*)
 		new Select(entityName, columns, newWhere, joins, orderBy, context)
