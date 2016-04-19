@@ -3,6 +3,7 @@ package tptfc.sdbc
 import java.sql._
 import scala.Some
 import scala.Array
+import scala.util.matching.Regex
 
 /**
  * Created by tptfc on 4/5/14.
@@ -177,35 +178,23 @@ object SQL {
     if (args.isEmpty) {
       sql->Nil
     } else {
-      val tmp = new StringBuilder()
-      tmp.append(sql).append(" ")
-      val params = tmp.toString().split("\\}")
+      var seq:List[Any] = Nil
+      val mapArgs = args.map({ t => (t._1, t._2)}).toMap
+      var query = sql
 
-      if (params.length > 1) {
-        val seq = new Array[Any](params.length - 1)
-        val mapArgs = args.map({ t => (t._1, t._2)}).toMap
-        var i = 0
-        var query = sql
-        while (i < params.length -1) {
-          val key = params(i).split("\\{")(1).trim
-          val param = mapArgs.get(key).get
-          seq(i) = param
+      val pattern = new Regex("""\$([\w]+)""", "key")
+			query = pattern replaceAllIn (sql, m => {
+				val key = m.group("key")
+				val param = mapArgs.get(key).get
+				seq = seq ::: (param :: Nil)
 
-          val value =
-          param match {
-            case (seq:Seq[_]) => seq.map(f => "?").mkString(",")
-            case _ => "?"
-          }
-
-          query = query.replaceAll("\\{" + key + "\\}", value)
-
-          i = i + 1
+        param match {
+          case (seq:Seq[_]) => seq.map(f => "?").mkString(",")
+          case _ => "?"
         }
+			})
 
-        query->seq.toList
-      } else {
-        sql->Nil
-      }
+      query->seq.toList
     }
   }
 }

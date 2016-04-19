@@ -14,7 +14,7 @@ class Update(entityName: String, context: Context) {
 		val whereFields = entry.tableKeys.map(field => field._1).toSeq
 		val whereArgs = entry.getArgs(whereFields, obj)
 
-		val where = whereFields.map(f => f + " = {" + f + "}").mkString(" AND ")
+		val where = whereFields.mkString("$", " AND $", "")
 
 		Update.exec(table, fields, args, where, whereArgs, context)
 	}
@@ -52,7 +52,7 @@ object Update {
 	context: Context): UpdateResult = {
 		val sql =
 		"UPDATE " + table + " SET " +
-		fields.map(field => field + " = {" + field + "}").mkString(", ") + where
+		fields.mkString("$", ", $", "") + where
 
 		val allArgs = args.toList ::: whereArgs.toList
 

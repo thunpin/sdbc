@@ -11,7 +11,7 @@ class Delete(entityName: String, context: Context) {
 		val whereFields = entry.tableKeys.map(field => field._1).toSeq
 		val whereArgs = entry.getArgs(whereFields, obj)
 
-		val where = whereFields.map(f => f + " = {" + f + "}").mkString(" AND ")
+		val where = whereFields.mkString("$", " AND $", "")
 
 		exec(table, where, whereArgs, context)
 	}

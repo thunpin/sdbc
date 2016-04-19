@@ -126,7 +126,6 @@ protected class Join(entityName: String, as: String, on: Where) {
 protected class Where(prefix: String, where: String, args: (String, Any)*) {
 	def parse(context: Context): (String, Seq[(String, Any)]) = {
 		val record = context.record
-		val pattern = new Regex(""":([\w]+)\.([\w]+)""", "entity", "field")
 		val wSql = SelectUtil.parseSQL(where, context)
 		val sql = " " + prefix + " " + wSql
 		(sql, args)

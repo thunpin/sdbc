@@ -30,7 +30,7 @@ class Insert(entityName: String, context: Context) {
 	fields:Seq[String],
 	args:Seq[(String,Any)]): InsertResult = {
 		val sql = "INSERT INTO " + table + fields.mkString("(", ",", ")") +
-							" VALUES " + fields.mkString("({", "} ,{", "})")
+							" VALUES " + fields.mkString("($", ", $", ")")
 
 		implicit val conn = context.conn
 		var result = SQL.insert(sql, args:_*)
