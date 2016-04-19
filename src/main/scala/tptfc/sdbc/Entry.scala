@@ -16,7 +16,6 @@ class Entry(
 
 		tableFields.foreach(name => {
 			val entityField = tableFieldToEntityField.getOrElse(name, name)
-			println(entityField)
 			val field = entity.getClass().getDeclaredField(entityField)
 			field.setAccessible(true)
 			val value = field.get(entity)
