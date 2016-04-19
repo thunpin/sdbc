@@ -5,7 +5,7 @@ import tptfc.sdbc.Context
 
 class Insert(entityName: String, context: Context) {
 
-	def entity(obj: Any): InsertResult = {
+	def entity[T](obj: T): InsertResult = {
 		val record = context.record
 		val entry = record entryFrom entityName
 		val table = entry.tableName

@@ -1,7 +1,6 @@
 package tptfc.sdbc
 
 import tptfc.sdbc.error.FieldNotFound
-import scala.reflect.runtime.universe._
 
 class Entry(
 	val tableName: String,
@@ -12,16 +11,15 @@ class Entry(
 	val entityFieldToTableField: Map[String, String],
 	val tableFieldToEntityField: Map[String, String]) {
 
-	def getArgs(tableFields: Seq[String], entity: Any): Seq[(String, Any)] = {
+	def getArgs[A](tableFields: Seq[String], entity: A): Seq[(String, Any)] = {
 		var args: List[(String, Any)] = Nil
-		val entityType = getTypeFrom(entity)
-		val mirrorEntity = runtimeMirror(getClass.getClassLoader)
-		val reflectEntity = mirrorEntity reflect entity
 
 		tableFields.foreach(name => {
 			val entityField = tableFieldToEntityField.getOrElse(name, name)
-			val term = entityType.decl(TermName(name)).asTerm
-			val value = reflectEntity.reflectField(term).get
+			println(entityField)
+			val field = entity.getClass().getDeclaredField(entityField)
+			field.setAccessible(true)
+			val value = field.get(entity)
 			args = (name -> value) :: args
 		})
 
@@ -34,8 +32,6 @@ class Entry(
 			case None => throw new FieldNotFound(tableField)
 		}
 	}
-
-	private def getTypeFrom[T: TypeTag](obj: T) = typeOf[T]
 }
 
 object Entry {
