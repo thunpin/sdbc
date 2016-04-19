@@ -86,10 +86,14 @@ context: Context) {
 		val (joinsSQL, joinsArgs) = buildJoins
 		val args = joinsArgs.toList ::: whereArgs.toList
 
+		val record = context.record
+		val entry = record entryFrom entityName
+		val table = entry.tableName
+
 		val sql =
 			"SELECT " + columns.mkString(",") +
-			" FROM " + entityName +
-			" AS " + "_" + entityName + joinsSQL + whereSQL + orderBy.getOrElse("")
+			" FROM " + table +
+			" AS " + "_" + table + joinsSQL + whereSQL + orderBy.getOrElse("")
 
 		(sql, args)
 	}
