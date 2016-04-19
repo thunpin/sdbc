@@ -9,6 +9,7 @@ class Entry(
 	val tableFields: List[String],
 	val tableAllFields: List[String],
 	val entityFields: List[String],
+	val entityFieldToTableField: Map[String, String],
 	val tableFieldToEntityField: Map[String, String]) {
 
 	def getArgs(tableFields: Seq[String], entity: Any): Seq[(String, Any)] = {
@@ -28,7 +29,7 @@ class Entry(
 	}
 
 	def entityFieldFrom(tableField: String): String = {
-		tableFieldToEntityField get tableField match {
+		entityFieldToTableField get tableField match {
 			case Some(name:String) => name
 			case None => throw new FieldNotFound(tableField)
 		}
@@ -44,6 +45,7 @@ object Entry {
 	tableFields: List[String],
 	tableAllFields: List[String],
 	entityFields: List[String],
+	entityFieldToTableField: Map[String, String],
 	tableFieldToEntityField: Map[String, String]) =
 		new Entry(
 			tableName,
@@ -51,6 +53,7 @@ object Entry {
 			tableFields,
 			tableAllFields,
 			entityFields,
+			entityFieldToTableField,
 			tableFieldToEntityField)
 
 	def build(
@@ -63,13 +66,14 @@ object Entry {
 		var tableFields:List[String] = Nil
 		var tableAllFields:List[String] = Nil
 		var entityFields:List[String] = Nil
+		var entityFieldToTableField:Map[String, String] = Map()
 		var tableFieldToEntityField:Map[String, String] = Map()
 
 		_fields.foreach(field => {
 			val keysSimbol:List[String] = "$" :: "#" :: Nil
 			val isAutoKey = field.contains(keysSimbol(0))
 			val isKey = field.contains(keysSimbol(1))
-			val _field = field.filterNot(keysSimbol.toSet)
+			val _field = field.replace("$","").replace("#","")
 
 			val splited = _field.split("::")
 			val entityField = splited(0)
@@ -83,6 +87,7 @@ object Entry {
 
 			tableAllFields = tableAllFields ::: (tableField :: Nil)
 			entityFields = entityFields ::: (entityField :: Nil)
+			entityFieldToTableField += (entityField -> tableField)
 			tableFieldToEntityField += (tableField -> entityField)
 		})
 
@@ -92,6 +97,7 @@ object Entry {
 			tableFields,
 			tableAllFields,
 			entityFields,
+			entityFieldToTableField,
 			tableFieldToEntityField)
 	}
 }

@@ -59,11 +59,11 @@ context: Context) {
 
 		var count = 0
 		_filters.foreach(filter => {
-			val key = "_w_arg" + count
-			val rule = filter._1 + " = " + key
+			val key = "_w_arg" + count + ""
+			val rule = filter._1 + " = {" + key + "}"
 
 			rules = rule :: rules
-			args = (rule -> filter._2) :: args
+			args = (key -> filter._2) :: args
 			count = count + 1
 		})
 
