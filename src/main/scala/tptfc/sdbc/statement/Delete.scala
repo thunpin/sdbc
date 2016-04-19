@@ -7,29 +7,46 @@ class Delete(entityName: String, context: Context) {
 	def entity(obj: Any):DeleteResult = {
 		val record = context.record
 		val entry = record entryFrom entityName
-		val table = entry.tableName
 		val whereFields = entry.tableKeys.map(field => field._1).toSeq
 		val whereArgs = entry.getArgs(whereFields, obj)
 
-		val where = whereFields.mkString("$", " AND $", "")
+		val whereSQL = whereFields.map(f => f + " = $" + f).mkString(" AND ")
+		val where = new Where("WHERE", whereSQL, whereArgs:_*)
 
-		exec(table, where, whereArgs, context)
+		exec(where, context)
 	}
 
-	def where(where: String, whereArgs: (String, Any)*): DeleteResult = {
+	def filter(filter: (String,Any), filters: (String,Any)*): DeleteResult = {
+		val _filters = filter :: filters.toList
+		var args:List[(String, Any)] = Nil
+		var rules:List[String] = Nil
+
+		var count = 0
+		_filters.foreach(filter => {
+			val key = "_w_arg" + count + ""
+			val rule = filter._1 + " = $" + key
+
+			rules = rule :: rules
+			args = (key -> filter._2) :: args
+			count = count + 1
+		})
+
+		val sql = rules.mkString(" AND ")
+		where(sql, args:_*)
+	}
+
+	def where(where: String, args: (String, Any)*): DeleteResult = {
+		val newWhere = new Where("WHERE", where, args:_*)
+		exec(newWhere, context)
+	}
+
+	protected def exec(where: Where, context: Context): DeleteResult = {
 		val record = context.record
 		val entry = record entryFrom entityName
 		val table = entry.tableName
+		val (whereSQL, whereArgs) = where.parse(context)
 
-		exec(table, where, whereArgs, context)
-	}
-
-	protected def exec(
-								table: String,
-								where: String,
-								whereArgs:Seq[(String, Any)],
-								context: Context): DeleteResult = {
-		val sql = "DELETE FROM " + table + " WHERE " + where
+		val sql = "DELETE FROM " + table + " AS _" + table + whereSQL
 		implicit val conn = context.conn
 		val result = SQL.executeUpdate(sql, whereArgs:_*)
 		DeleteResult(result, sql)
