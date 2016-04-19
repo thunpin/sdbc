@@ -54,7 +54,7 @@ object SQL {
       addParams(pStmt,params)
       pStmt.executeUpdate()
     } finally {
-      pStmt.close()
+      Database close pStmt
     }
   }
 
@@ -73,7 +73,7 @@ object SQL {
       addParams(pStmt,params)
       pStmt.execute()
     } finally {
-      pStmt.close()
+      Database close pStmt
     }
   }
 
@@ -100,11 +100,11 @@ object SQL {
         result = result ::: parse(Result(r)) :: Nil
       }
 
-      r.close()
+      Database close r
 
       result
     } finally {
-      pStmt.close()
+      Database close pStmt
     }
   }
 
@@ -133,11 +133,11 @@ object SQL {
         None
       }
 
-      r.close()
+      Database close r
 
       result
     } finally {
-      pStmt.close()
+      Database close pStmt
     }
   }
 
