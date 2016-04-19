@@ -2,7 +2,7 @@ package tptfc.sdbc
 
 trait Database {
   protected def newSqlConnection: java.sql.Connection
-  protected def shutDown():Unit
+  def shutDown():Unit
 
   protected val record = Record()
 
