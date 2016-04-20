@@ -18,9 +18,9 @@ class Insert(entityName: String, context: Context) {
 
 	def values(args: (String, Any)*): InsertResult = {
 		val record = context.record
-		val fields = args.map(p => p._1)
 		val entry = record entryFrom entityName
 		val table = entry.tableName
+		val fields = args.map(p => entry tableFieldFrom p._1)
 
 		exec(table, fields, args)
 	}

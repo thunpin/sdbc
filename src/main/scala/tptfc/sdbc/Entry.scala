@@ -31,6 +31,13 @@ class Entry(
 			case None => throw new FieldNotFound(tableField)
 		}
 	}
+
+	def tableFieldFrom(entityField: String): String = {
+		tableFieldToEntityField get entityField match {
+			case Some(name:String) => name
+			case None => throw new FieldNotFound(entityField)
+		}
+	}
 }
 
 object Entry {
