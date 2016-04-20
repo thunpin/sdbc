@@ -37,10 +37,11 @@ context: Context) {
 	as: String,
 	on:String,
 	onArgs:(String,Any)*): Select = {
-		val where = new Where("ON", on, onArgs:_*)
-		val newJoin = new Join(entityName, as, where)
+		val joinWhere = new Where("ON", on, onArgs:_*)
+		println(as)
+		val newJoin = new Join(entityName, as, joinWhere)
 		val newJoins = joins.toList ::: (newJoin :: Nil)
-		new Select(entityName, columns, where, newJoins, orderBy, context)
+		new Select(this.entityName, columns, where, newJoins, orderBy, context)
 	}
 
 	def join(entityName: String, on: String, onArgs: (String,Any)*): Select = {
@@ -49,7 +50,7 @@ context: Context) {
 		val table = entry.tableName
 		val as = "_" + table
 
-		join(entityName, on, as, onArgs:_*)
+		join(entityName, as, on, onArgs:_*)
 	}
 
 	def filter(filter: (String,Any), filters: (String,Any)*): Select = {
