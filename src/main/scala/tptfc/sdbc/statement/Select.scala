@@ -38,7 +38,6 @@ context: Context) {
 	on:String,
 	onArgs:(String,Any)*): Select = {
 		val joinWhere = new Where("ON", on, onArgs:_*)
-		println(as)
 		val newJoin = new Join(entityName, as, joinWhere)
 		val newJoins = joins.toList ::: (newJoin :: Nil)
 		new Select(this.entityName, columns, where, newJoins, orderBy, context)

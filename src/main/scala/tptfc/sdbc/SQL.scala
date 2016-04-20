@@ -178,8 +178,6 @@ object SQL {
     if (args.isEmpty) {
       sql->Nil
     } else {
-      println(sql)
-      println(args)
       var seq:List[Any] = Nil
       val mapArgs = args.map({ t => (t._1, t._2)}).toMap
       var query = sql
