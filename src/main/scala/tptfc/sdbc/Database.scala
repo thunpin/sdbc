@@ -28,8 +28,8 @@ trait Database {
     }
   }
 
-  def register(reg: (String, Entry)*):Unit = reg.foreach(r => {
-    record.register(r)
+  def register(entries: Entry*):Unit = entries.foreach(entry => {
+    record.register(entry)
   })
 }
 

@@ -3,6 +3,7 @@ package tptfc.sdbc
 import tptfc.sdbc.error.FieldNotFound
 
 class Entry(
+  val entityName: String,
 	val tableName: String,
 	val tableKeys: Map[String, Boolean],
 	val tableFields: List[String],
@@ -42,14 +43,16 @@ class Entry(
 
 object Entry {
 	def apply(
-	tableName: String,
-	tableKeys: Map[String, Boolean],
-	tableFields: List[String],
-	tableAllFields: List[String],
-	entityFields: List[String],
-	entityFieldToTableField: Map[String, String],
-	tableFieldToEntityField: Map[String, String]) =
+	  entityName: String,
+	  tableName: String,
+	  tableKeys: Map[String, Boolean],
+	  tableFields: List[String],
+	  tableAllFields: List[String],
+	  entityFields: List[String],
+	  entityFieldToTableField: Map[String, String],
+	  tableFieldToEntityField: Map[String, String]) =
 		new Entry(
+		  entityName,
 			tableName,
 			tableKeys,
 			tableFields,
@@ -59,10 +62,11 @@ object Entry {
 			tableFieldToEntityField)
 
 	def build(
-	entity: String,
-	table: String,
-	field: String,
-	fields: String*):Entry = {
+	  entity: String,
+	  table: String,
+	  field: String,
+	  fields: String*):Entry = {
+
 		val _fields = field :: fields.toList
 		var tableKeys:Map[String, Boolean] = Map()
 		var tableFields:List[String] = Nil
@@ -94,6 +98,7 @@ object Entry {
 		})
 
 		Entry(
+		  entity,
 			table,
 			tableKeys,
 			tableFields,
