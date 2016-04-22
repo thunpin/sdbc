@@ -3,7 +3,6 @@ package tptfc.sdbc.statement
 import tptfc.sdbc.SQL
 import tptfc.sdbc.Context
 import tptfc.sdbc.Result
-import scala.util.matching.Regex
 
 class Select(
 entityName: String,
@@ -28,7 +27,7 @@ context: Context) {
 
 	def columns(column: String, columns: String*): Select = {
 		val columnsList = column :: columns.toList
-		val nColumns = columnsList.map(c => SelectUtil.parseSQL(c, context))
+		val nColumns = columnsList.map(c => StatementUtil.parseSQL(c, context))
 		new Select(entityName, nColumns, where, joins, orderBy, context)
 	}
 
@@ -77,7 +76,7 @@ context: Context) {
 	}
 
 	def orderBy(order:String): Select = {
-		val newOrderBy = " ORDER BY " + SelectUtil.parseSQL(order, context)
+		val newOrderBy = " ORDER BY " + StatementUtil.parseSQL(order, context)
 		new Select(entityName, columns, where, joins, Some(newOrderBy), context)
 	}
 
@@ -123,17 +122,5 @@ object Select {
 		val columns = entry.tableAllFields.map(field => tableName + "." + field)
 
 		new Select(entityName, columns, new EmptyWhere(), Nil, None, context)
-	}
-}
-
-protected object SelectUtil {
-	def parseSQL(sql: String, context: Context): String = {
-		val record = context.record
-		val pattern = new Regex(""":([\w]+)\.([\w]+)""", "entity", "field")
-
-		pattern replaceAllIn (sql, m => {
-			val entry = record entryFrom m.group("entity")
-			"_" + entry.tableName + "." + (entry entityFieldFrom m.group("field"))
-		})
 	}
 }
