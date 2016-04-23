@@ -29,16 +29,15 @@ protected class EmptyWhere() extends Where("", "")
 protected object StatementUtil {
 	def parseSQL(sql: String, context: Context): String = {
 		val record = context.record
-		val pattern = new Regex(""":([\w]+)\.([\w]+)""", "entity", "field")
+		val pattern = new Regex(""":([\w]+)\.{0,1}([\w]*)""", "entity", "field")
 
 		pattern replaceAllIn (sql, m => {
 			val entry = record entryFrom m.group("entity")
-			val table = "_" + entry.tableName
 
 			if (m.group("field").isEmpty)
-			  table
+			  entry.tableName + " AS _" + entry.tableName
 			else
-			  table + "." + (entry entityFieldFrom m.group("field"))
+			  "_" + entry.tableName + "." + (entry entityFieldFrom m.group("field"))
 		})
 	}
 }

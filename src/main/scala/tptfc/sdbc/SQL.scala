@@ -189,12 +189,10 @@ object SQL {
 				seq = seq ::: (param :: Nil)
 
         param match {
-          case (seq:Seq[_]) => seq.map(f => "?").mkString(",")
+          case (seq:Seq[_]) => seq.map(f => "?").mkString("(", ",", ")")
           case _ => "?"
         }
 			})
-
-      query->seq.toList
     }
   }
 }
