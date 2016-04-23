@@ -193,6 +193,8 @@ object SQL {
           case _ => "?"
         }
 			})
+
+      query->seq.toList
     }
   }
 }
