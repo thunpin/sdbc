@@ -27,7 +27,7 @@ class Insert(entityName: String, iContext: InsertContext, context: Context) {
 		new Insert(entityName, iContext, context)
 	}
 
-	def result: InsertResult = {
+	def exec: InsertResult = {
 	  val table = iContext.table
 	  val fields = iContext.fields
 	  val args = iContext.args

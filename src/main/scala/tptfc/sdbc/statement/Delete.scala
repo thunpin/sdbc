@@ -41,7 +41,7 @@ class Delete(entityName: String, objWhere:Where, context: Context) {
 		new Delete(entityName, objWhere, context)
 	}
 
-	def result: DeleteResult = {
+	def exec: DeleteResult = {
 		val record = context.record
 		val entry = record entryFrom entityName
 		val table = entry.tableName
