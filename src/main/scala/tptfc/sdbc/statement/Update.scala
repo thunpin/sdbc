@@ -53,7 +53,7 @@ class Update(entityName: String, uContext: UpdateContext, context: Context) {
 	  new Update(entityName, nUContext, context)
 	}
 
-	def exec: UpdateResult = {
+	def result: UpdateResult = {
 	  val record = context.record
 	  val entry = record entryFrom entityName
 		val table = entry.tableName
