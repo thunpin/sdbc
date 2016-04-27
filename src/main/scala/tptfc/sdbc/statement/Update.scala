@@ -3,34 +3,30 @@ package tptfc.sdbc.statement
 import tptfc.sdbc.SQL
 import tptfc.sdbc.Context
 
-class Update(entityName: String, context: Context) {
+class Update(entityName: String, uContext: UpdateContext, context: Context) {
 
-	def entity(obj: Any): UpdateResult = {
+	def entity(obj: Any): Update = {
 		val record = context.record
 		val entry = record entryFrom entityName
-		val table = entry.tableName
 		val fields = entry.tableAllFields
 		val args = entry.getArgs(fields, obj)
 		val whereFields = entry.tableKeys.map(field => field._1).toSeq
 		val whereArgs = entry.getArgs(whereFields, obj)
 
 		val where = whereFields.map(f => f + " = $" + f).mkString(" AND ")
-		val _where = new Where("WHERE", where, whereArgs:_*)
+		val objWhere = new Where("WHERE", where, whereArgs:_*)
 
-		Update.exec(table, fields, args, _where, context)
+    val uContext = new UpdateContext(fields, args, objWhere)
+		new Update(entityName, uContext, context)
 	}
 
-	def values(args: (String, Any)*):UpdateWhere = {
-		new UpdateWhere(entityName, args, context)
+	def values(args: (String, Any)*):Update = {
+	  val fields = args.map(arg => arg._1)
+	  val newUContext = new UpdateContext(fields, args, uContext.where)
+	  new Update(entityName, newUContext, context)
 	}
-}
 
-class UpdateWhere(
-entityName: String,
-args:Seq[(String, Any)],
-context: Context) {
-
-	def filter(filter: (String,Any), filters: (String,Any)*): UpdateResult = {
+	def filter(filter: (String,Any), filters: (String,Any)*): Update = {
 		val _filters = filter :: filters.toList
 		var args:List[(String, Any)] = Nil
 		var rules:List[String] = Nil
@@ -49,29 +45,21 @@ context: Context) {
 		where(sql, args:_*)
 	}
 
-	def where(where: String, whereArgs: (String,Any)*): UpdateResult = {
+	def where(where: String, whereArgs: (String,Any)*): Update = {
 		val record = context.record
 		val entry = record entryFrom entityName
-		val table = entry.tableName
-		val fields = args.map(arg => arg._1)
-
-		val _where = new Where("WHERE", where, whereArgs:_*)
-		Update.exec(table, fields, args, _where, context)
+		val objWhere = new Where("WHERE", where, whereArgs:_*)
+		val nUContext = new UpdateContext(uContext.fields, uContext.args, objWhere)
+	  new Update(entityName, nUContext, context)
 	}
-}
 
-case class UpdateResult(result: Long, sql: String)
-
-object Update {
-	def apply(entityName: String, context: Context): Update =
-		new Update(entityName, context)
-
-	def exec(
-					table: String,
-					fields:Seq[String],
-					args:Seq[(String, Any)],
-					where: Where,
-					context: Context): UpdateResult = {
+	def result: UpdateResult = {
+	  val record = context.record
+	  val entry = record entryFrom entityName
+		val table = entry.tableName
+		val fields = uContext.fields
+		val args = uContext.args
+		val where = uContext.where
 
 		val (whereSQL, whereArgs) = where.parse(context)
 		val sql =
@@ -84,4 +72,18 @@ object Update {
 		val result = SQL.executeUpdate(sql, allArgs:_*)
 		UpdateResult(result, sql)
 	}
+}
+
+class UpdateContext(
+  val fields:Seq[String],
+  val args:Seq[(String, Any)],
+	val where: Where)
+
+case class EmptyUpdateContext() extends UpdateContext(Nil, Nil, EmptyWhere())
+
+case class UpdateResult(result: Long, sql: String)
+
+object Update {
+	def apply(entityName: String, context: Context): Update =
+		new Update(entityName, EmptyUpdateContext(), context)
 }

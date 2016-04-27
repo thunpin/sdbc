@@ -3,8 +3,9 @@ package tptfc.sdbc.statement
 import tptfc.sdbc.SQL
 import tptfc.sdbc.Context
 
-class Delete(entityName: String, context: Context) {
-	def entity(obj: Any):DeleteResult = {
+class Delete(entityName: String, objWhere:Where, context: Context) {
+
+	def entity(obj: Any):Delete = {
 		val record = context.record
 		val entry = record entryFrom entityName
 		val whereFields = entry.tableKeys.map(field => field._1).toSeq
@@ -13,10 +14,10 @@ class Delete(entityName: String, context: Context) {
 		val whereSQL = whereFields.map(f => f + " = $" + f).mkString(" AND ")
 		val where = new Where("WHERE", whereSQL, whereArgs:_*)
 
-		exec(where, context)
+		new Delete(entityName, where, context)
 	}
 
-	def filter(filter: (String,Any), filters: (String,Any)*): DeleteResult = {
+	def filter(filter: (String,Any), filters: (String,Any)*): Delete = {
 		val _filters = filter :: filters.toList
 		var args:List[(String, Any)] = Nil
 		var rules:List[String] = Nil
@@ -35,16 +36,16 @@ class Delete(entityName: String, context: Context) {
 		where(sql, args:_*)
 	}
 
-	def where(where: String, args: (String, Any)*): DeleteResult = {
-		val newWhere = new Where("WHERE", where, args:_*)
-		exec(newWhere, context)
+	def where(where: String, args: (String, Any)*): Delete = {
+		val objWhere = new Where("WHERE", where, args:_*)
+		new Delete(entityName, objWhere, context)
 	}
 
-	protected def exec(where: Where, context: Context): DeleteResult = {
+	def result: DeleteResult = {
 		val record = context.record
 		val entry = record entryFrom entityName
 		val table = entry.tableName
-		val (whereSQL, whereArgs) = where.parse(context)
+		val (whereSQL, whereArgs) = objWhere.parse(context)
 
 		val sql = "DELETE FROM " + table + " AS _" + table + whereSQL
 		implicit val conn = context.conn
@@ -57,5 +58,5 @@ case class DeleteResult(result: Long, sql: String)
 
 object Delete {
 	def apply(entityName: String, context: Context): Delete =
-		new Delete(entityName, context)
+		new Delete(entityName, EmptyWhere(), context)
 }

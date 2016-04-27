@@ -3,32 +3,34 @@ package tptfc.sdbc.statement
 import tptfc.sdbc.SQL
 import tptfc.sdbc.Context
 
-class Insert(entityName: String, context: Context) {
+class Insert(entityName: String, iContext: InsertContext, context: Context) {
 
-	def entity[T](obj: T): InsertResult = {
+	def entity[T](obj: T): Insert = {
 		val record = context.record
 		val entry = record entryFrom entityName
 		val table = entry.tableName
 		val fields = entry.tableKeys.filter(key => !key._2).keys.toList :::
-		 entry.tableFields
+		  entry.tableFields
 		val args = entry.getArgs(fields, obj)
 
-		exec(table, fields, args)
+		val iContext = InsertContext(table, fields, args)
+		new Insert(entityName, iContext, context)
 	}
 
-	def values(args: (String, Any)*): InsertResult = {
+	def values(args: (String, Any)*): Insert = {
 		val record = context.record
 		val entry = record entryFrom entityName
 		val table = entry.tableName
 		val fields = args.map(p => entry tableFieldFrom p._1)
 
-		exec(table, fields, args)
+		val iContext = InsertContext(table, fields, args)
+		new Insert(entityName, iContext, context)
 	}
 
-	protected def exec(
-	table: String,
-	fields:Seq[String],
-	args:Seq[(String,Any)]): InsertResult = {
+	def result: InsertResult = {
+	  val table = iContext.table
+	  val fields = iContext.fields
+	  val args = iContext.args
 		val sql = "INSERT INTO " + table + fields.mkString("(", ",", ")") +
 							" VALUES " + fields.mkString("($", ", $", ")")
 
@@ -39,9 +41,14 @@ class Insert(entityName: String, context: Context) {
 	}
 }
 
+case class InsertContext(
+  table: String,
+  fields:Seq[String],
+	args:Seq[(String,Any)])
+
 case class InsertResult(result: Option[Long], sql: String)
 
 object Insert {
 	def apply(entityName: String, context: Context): Insert =
-		new Insert(entityName, context)
+		new Insert(entityName, InsertContext("", Nil, Nil), context)
 }

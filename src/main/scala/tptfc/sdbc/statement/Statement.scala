@@ -24,7 +24,7 @@ protected class Where(prefix: String, where: String, args: (String, Any)*) {
 	}
 }
 
-protected class EmptyWhere() extends Where("", "")
+protected case class EmptyWhere() extends Where("", "")
 
 protected object StatementUtil {
 	def parseSQL(sql: String, context: Context): String = {
