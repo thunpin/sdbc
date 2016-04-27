@@ -46,7 +46,7 @@ case class InsertContext(
   fields:Seq[String],
 	args:Seq[(String,Any)])
 
-case class InsertResult(result: Option[Long], sql: String)
+case class InsertResult(id: Option[Long], sql: String)
 
 object Insert {
 	def apply(entityName: String, context: Context): Insert =

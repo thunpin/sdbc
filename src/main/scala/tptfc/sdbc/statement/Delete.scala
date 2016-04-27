@@ -54,7 +54,7 @@ class Delete(entityName: String, objWhere:Where, context: Context) {
 	}
 }
 
-case class DeleteResult(result: Long, sql: String)
+case class DeleteResult(qtd: Long, sql: String)
 
 object Delete {
 	def apply(entityName: String, context: Context): Delete =

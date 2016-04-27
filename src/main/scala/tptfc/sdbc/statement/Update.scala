@@ -81,7 +81,7 @@ class UpdateContext(
 
 case class EmptyUpdateContext() extends UpdateContext(Nil, Nil, EmptyWhere())
 
-case class UpdateResult(result: Long, sql: String)
+case class UpdateResult(qtd: Long, sql: String)
 
 object Update {
 	def apply(entityName: String, context: Context): Update =
